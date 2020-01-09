@@ -13,19 +13,14 @@ import os
 import pickle
 import sys
 import subprocess
-from sgtk.platform.qt import QtCore
 
+from sgtk.platform.qt import QtCore
+from sgtk.dd_utils import dd_jstools_utils
 
 try:
     import nuke
 except ImportError:
     nuke = None
-
-
-# DD imports
-from dd.runtime import api
-api.load('wam')
-from wam.utils.proc import formCleanEnv
 
 
 class Renderer(object):
@@ -175,7 +170,7 @@ class Renderer(object):
         run_in_batch_mode = True if nuke is None else False
 
         event_loop = QtCore.QEventLoop()
-        thread = ShooterThread(render_info, run_in_batch_mode, active_progress_info)
+        thread = ShooterThread(self.__app.context, render_info, run_in_batch_mode, active_progress_info)
         thread.finished.connect(event_loop.quit)
         thread.start()
         event_loop.exec_()
@@ -217,8 +212,10 @@ class NoProcessedPathsReturnedByNukeSubprocess(Exception):
 
 
 class ShooterThread(QtCore.QThread):
-    def __init__(self, render_info, batch_mode=True, active_progress_info=None):
+    def __init__(self, context, render_info, batch_mode=True, active_progress_info=None):
         QtCore.QThread.__init__(self)
+
+        self.context = context
         self.render_info = render_info
         self.batch_mode = batch_mode
         self.active_progress_info = active_progress_info
@@ -254,7 +251,7 @@ class ShooterThread(QtCore.QThread):
             '--render_info', pickle.dumps(self.render_info['render_info']),
         ]
 
-        clean_env = formCleanEnv()
+        clean_env = dd_jstools_utils.build_clean_env(self.context)
         clean_env["TANK_CONTEXT"] = self.render_info['serialized_context']
 
         p = subprocess.Popen(cmd_and_args, stderr=subprocess.PIPE, env=clean_env, bufsize=1)
