@@ -44,13 +44,13 @@ class Submitter(object):
         
         # Create the version in Shotgun
         ctx = self.__app.context
+        has_slate = self.__app.get_setting("mov_has_slate")
         data = {
             "code": version_name,
             "sg_status_list": self.__app.get_setting("new_version_status"),
             "entity": ctx.entity,
             "sg_task": sg_task,
-            # reverting this back since artists now render the slate frames too.
-            "sg_first_frame": first_frame,
+            "sg_first_frame": first_frame if has_slate else first_frame - 1,
             "sg_last_frame": last_frame,
             "frame_count": (last_frame-first_frame+1),
             "frame_range": "%s-%s" % (first_frame, last_frame),
@@ -59,7 +59,7 @@ class Submitter(object):
             "user": current_user,
             "description": comment,
             "sg_path_to_frames": path_to_frames,
-            "sg_movie_has_slate": self.__app.get_setting("mov_has_slate"),
+            "sg_movie_has_slate": has_slate,
             "project": ctx.project,
         }
 
