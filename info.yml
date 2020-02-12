@@ -139,6 +139,18 @@ configuration:
         default_value: true
         description: Set the "Movie has slate" property on the version entity.
 
+    entity_burnin_sg_fields:
+        type: list
+        values: {type: str}
+        default_value: []
+        description: SG fields on entity to be added as burnins on slate
+
+    task_burnin_sg_fields:
+        type: list
+        values: {type: str}
+        default_value: []
+        description: SG fields on task to be added as burnins on slate
+
 # the Shotgun fields that this app needs in order to operate correctly
 requires_shotgun_fields:
 
